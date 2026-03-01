@@ -27,7 +27,7 @@ struct MainConfig {
     output_absolute: bool,
 
     /// The starting directory for the search operation.
-    #[arg(short, long, default_value = ".")]
+    #[arg(short, long, default_value = ".", default_value_t = String::from("current"))]
     search_directory: String,
 }
 
@@ -134,8 +134,7 @@ fn display_results(print_config: PrintConfig) {
         for match_item in &print_config.exact_matches {
             println!("  {}", format_path(match_item, &print_config));
         }
-    } else {
-        println!("\nNo exact match found.");
+        return;
     }
 
     if !print_config.partial_matches.is_empty() {
@@ -168,7 +167,12 @@ fn display_results(print_config: PrintConfig) {
 
 fn main() -> Result<()> {
     let config = MainConfig::parse();
-    let search_path = PathBuf::from(&config.search_directory);
+    let search_directory = if config.search_directory == "current" {
+        "."
+    } else {
+        &config.search_directory
+    };
+    let search_path = PathBuf::from(search_directory);
 
     let type_extensions = config
         .file_type
@@ -204,8 +208,6 @@ fn main() -> Result<()> {
             .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈"),
     );
 
-    // High-level Abstraction:
-    // Parallelized multi-threaded traversal utilizing a progress tracking heartbeat.
     WalkBuilder::new(&search_path).build_parallel().run(|| {
         let context_ref = Arc::clone(&search_context);
         let exact_ref = Arc::clone(&exact_matches);
