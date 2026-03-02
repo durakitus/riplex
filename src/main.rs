@@ -9,7 +9,7 @@ use strsim::jaro_winkler;
 
 #[derive(Parser)]
 #[command(
-    author,
+    name = "riplex",
     version,
     about = "This tool is a quick file searcher that uses parallel scanning and category filters to find your data.",
     long_about = "This tool is a high performance search utility that scans your file system in parallel to find exactly what you are looking for by using semantic matching and category filters."
